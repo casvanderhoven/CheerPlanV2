@@ -20,9 +20,9 @@ and the validated domain logic are captured in [docs/SPEC.md](docs/SPEC.md).
 | Milestone | Deliverable | Status |
 |---|---|---|
 | **M1** | `CheerPlanCore` — models, GPX, ETA, snapping, feasibility, proposer, live estimator; fully tested | ✅ |
-| **M2** | App shell (iOS 18+, SwiftUI): import GPX (file/URL), course map + elevation, runner plans, GRDB persistence | ✅ in review |
-| M3 | Supporter planning: spots, auto-propose, real routing, fixes UI | — |
-| M4 | Link sharing + App Clip preview | — |
+| **M2** | App shell (iOS 18+, SwiftUI): import GPX (file/URL), course map + elevation, runner plans, GRDB persistence | ✅ |
+| **M3** | Supporter planning: tap-to-add spots, auto-propose, MapKit routing + offline cache, feasibility + fixes UI | ✅ in review |
+| **M4** | Link sharing (serverless deep links) + `.cheerplan` files | ✅ in review (App Clip/web preview deferred) |
 | M5 | Race day: live engine, resume, Live Activity, notifications | — |
 | M6 | Multi-runner + crew | — |
 

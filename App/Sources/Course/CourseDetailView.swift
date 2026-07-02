@@ -8,6 +8,7 @@ struct CourseDetailView: View {
     @Environment(AppState.self) private var appState
     let plan: RunnerPlan
     @State private var showingEditor = false
+    @State private var showingShare = false
 
     /// Always render the freshest copy; `plan` is just the navigation payload.
     private var currentPlan: RunnerPlan {
@@ -22,7 +23,10 @@ struct CourseDetailView: View {
             .navigationTitle(currentPlan.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button("Share plan", systemImage: "square.and.arrow.up") {
+                        showingShare = true
+                    }
                     Button("Edit plan", systemImage: "slider.horizontal.3") {
                         showingEditor = true
                     }
@@ -31,10 +35,26 @@ struct CourseDetailView: View {
             .sheet(isPresented: $showingEditor) {
                 PlanEditorView(plan: currentPlan)
             }
+            .sheet(isPresented: $showingShare) {
+                SharePlanView(plan: currentPlan)
+            }
     }
 
     private var summaryPanel: some View {
         VStack(spacing: 12) {
+            NavigationLink {
+                SupporterPlanView(
+                    model: SupporterPlanModel(
+                        runnerPlan: currentPlan,
+                        store: appState.supporterPlanStore,
+                        travelProvider: appState.travelTimeProvider
+                    )
+                )
+            } label: {
+                Label("Plan your cheering", systemImage: "megaphone")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
             HStack {
                 stat("Distance", Formatters.distance(currentPlan.course.totalDistance))
                 stat("Climb", climbText)

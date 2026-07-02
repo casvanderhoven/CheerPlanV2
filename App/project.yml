@@ -28,11 +28,35 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cheerplan.app
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
         TARGETED_DEVICE_FAMILY: "1"
         CURRENT_PROJECT_VERSION: "1"
-        MARKETING_VERSION: "0.2.0"
+        MARKETING_VERSION: "0.4.0"
+    info:
+      path: Sources/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleURLTypes:
+          - CFBundleURLName: com.cheerplan.app
+            CFBundleURLSchemes:
+              - cheerplan
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: CheerPlan Plan
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Owner
+            LSItemContentTypes:
+              - com.cheerplan.plan
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.cheerplan.plan
+            UTTypeDescription: CheerPlan Plan
+            UTTypeConformsTo:
+              - public.json
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - cheerplan
     scheme:
       testTargets: []

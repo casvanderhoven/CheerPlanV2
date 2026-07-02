@@ -1,4 +1,5 @@
 import CheerPlanCore
+import CheerPlanData
 import CheerPlanUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -56,7 +57,7 @@ struct CourseImportView: View {
     }
 
     private var gpxTypes: [UTType] {
-        var types: [UTType] = [.xml, .data]
+        var types: [UTType] = [.cheerplan, .xml, .data]
         if let gpx = UTType(filenameExtension: "gpx") {
             types.insert(gpx, at: 0)
         }
@@ -76,6 +77,12 @@ struct CourseImportView: View {
             }
             do {
                 let data = try Data(contentsOf: url)
+                // A shared .cheerplan file carries a full plan; anything else is GPX.
+                if let shared = try? PlanShareCodec.decodePlan(fromFileData: data) {
+                    await appState.save(shared)
+                    dismiss()
+                    return
+                }
                 try await makePlan(from: data, suggestedName: url.deletingPathExtension().lastPathComponent)
             } catch {
                 importError = message(for: error)

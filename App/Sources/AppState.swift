@@ -8,6 +8,7 @@ import Observation
 @Observable
 final class AppState {
     let planStore: any PlanStore
+    let supporterPlanStore: any SupporterPlanStore
     let travelTimeProvider: any TravelTimeProvider
     let startupError: String?
 
@@ -18,6 +19,7 @@ final class AppState {
 
     init(dependencies: Dependencies) {
         self.planStore = dependencies.planStore
+        self.supporterPlanStore = dependencies.supporterPlanStore
         self.travelTimeProvider = dependencies.travelTimeProvider
         self.startupError = dependencies.startupError
     }
@@ -58,6 +60,33 @@ final class AppState {
             await loadPlans()
         } catch {
             errorMessage = "Couldn't duplicate \"\(plan.name)\": \(error.localizedDescription)"
+        }
+    }
+
+    /// Handles share links (`cheerplan://`, `https://cheerplan.app/...`) and
+    /// `.cheerplan` files arriving via "open with".
+    func handleIncomingURL(_ url: URL) async {
+        do {
+            let plan: RunnerPlan
+            if url.isFileURL {
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer {
+                    if accessing {
+                        url.stopAccessingSecurityScopedResource()
+                    }
+                }
+                plan = try PlanShareCodec.decodePlan(fromFileData: try Data(contentsOf: url))
+            } else {
+                plan = try PlanShareCodec.decodePlan(from: url)
+            }
+            try await planStore.save(plan)
+            await loadPlans()
+        } catch ShareCodecError.unsupportedVersion {
+            errorMessage = "This plan was shared from a newer version of CheerPlan. Update the app and try again."
+        } catch ShareCodecError.notAShareLink {
+            errorMessage = "That link isn't a CheerPlan plan."
+        } catch {
+            errorMessage = "Couldn't import the shared plan: \(error.localizedDescription)"
         }
     }
 }

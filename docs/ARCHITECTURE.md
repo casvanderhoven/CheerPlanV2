@@ -52,7 +52,7 @@ Rules, enforced by review and by construction:
 |---|---|---|---|
 | Persistence (SwiftData vs GRDB, spec says pick one) | **GRDB** | The live engine's event log and "persist on every mutation" favor explicit, synchronous write control; GRDB is fully testable off-device and battle-tested for migrations. All access goes through the `PlanStore` protocol (`CheerPlanData`), so previews/tests use `InMemoryPlanStore`. | Adopted (M2) |
 | Test framework | **Swift Testing** | Native to the Swift 6 toolchain, runs under `swift test` on Linux CI. | Adopted |
-| Share-link payload | Versioned from day one; CloudKit public DB vs. tiny redirect service | Spec §5. | Open — decide at M4 |
+| Share-link payload | **Serverless v1**: the whole plan travels in the URL fragment (`https://cheerplan.app/p#v1.<base64url>`), course simplified (Douglas–Peucker) + polyline-encoded; `.cheerplan` files carry full fidelity | No backend needed for phone-to-phone sharing; a CloudKit/redirect service + App Clip + web preview can later wrap the same versioned payloads (remaining M4 work — needs infra + signing). | Adopted (M4) |
 | CI | Linux container job (`swift:6.1`) for Core tests + SwiftLint job + macOS job (`macos-15`): CheerPlanUI/CheerPlanData `swift test`, XcodeGen project generation, simulator build of the app | Core is platform-agnostic and verified on every push; the macOS job proves the SwiftUI/MapKit/Charts and GRDB code compiles and passes tests. | Adopted |
 
 ## Roadmap (spec §7)
@@ -60,9 +60,9 @@ Rules, enforced by review and by construction:
 | Milestone | Deliverable | Status |
 |---|---|---|
 | **M1** | `CheerPlanCore`: models + GPX + ETA + snapping + feasibility + proposer + live estimator, fully tested on real GPX fixtures | **Done (PR #1)** |
-| **M2** | App shell: import GPX (file/URL), course map + elevation, create/edit/duplicate runner plans, GRDB persistence | **This PR** |
-| M3 | Supporter planning: spots, auto-propose, real MapKit routing, feasibility + fixes UI | — |
-| M4 | Sharing: deep links + App Clip preview, `.cheerplan` fallback | — |
+| **M2** | App shell: import GPX (file/URL), course map + elevation, create/edit/duplicate runner plans, GRDB persistence | **Done** |
+| **M3** | Supporter planning: tap-to-add spots (pass-aware), auto-propose, real MapKit routing + on-disk cache, feasibility + fixes UI | **This PR** |
+| **M4** | Sharing: serverless deep links + `.cheerplan` files, in-app open handling | **This PR** (App Clip/web preview deferred — needs infra) |
 | M5 | Race day: live engine actor, persistence/resume, Live Activity, notifications | — |
 | M6 | Multi-runner + crew assignments | — |
 

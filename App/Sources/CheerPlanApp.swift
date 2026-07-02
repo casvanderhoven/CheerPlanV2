@@ -14,6 +14,9 @@ struct CheerPlanApp: App {
         WindowGroup {
             RootView()
                 .environment(appState)
+                .onOpenURL { url in
+                    Task { await appState.handleIncomingURL(url) }
+                }
         }
     }
 }
