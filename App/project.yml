@@ -1,0 +1,38 @@
+# XcodeGen spec — generate with `xcodegen generate --spec App/project.yml --project App`
+name: CheerPlan
+options:
+  bundleIdPrefix: com.cheerplan
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+packages:
+  CheerPlanCore:
+    path: ../CheerPlanCore
+  CheerPlanData:
+    path: ../CheerPlanData
+  CheerPlanUI:
+    path: ../CheerPlanUI
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+targets:
+  CheerPlan:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    dependencies:
+      - package: CheerPlanCore
+      - package: CheerPlanData
+      - package: CheerPlanUI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cheerplan.app
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        TARGETED_DEVICE_FAMILY: "1"
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.2.0"
+    scheme:
+      testTargets: []
