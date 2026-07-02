@@ -13,6 +13,32 @@ public protocol TravelTimeProvider: Sendable {
     ) async throws -> TravelEstimate
 }
 
+/// Tries real routing first and falls back to an always-available estimator when
+/// it fails (offline, routing errors) — the fallback's results stay tagged
+/// `isEstimate`, so the UI can label them.
+public struct FallbackTravelTimeProvider: TravelTimeProvider {
+    public let primary: any TravelTimeProvider
+    public let fallback: any TravelTimeProvider
+
+    public init(primary: any TravelTimeProvider, fallback: any TravelTimeProvider = HeuristicTravelEstimator()) {
+        self.primary = primary
+        self.fallback = fallback
+    }
+
+    public func travelEstimate(
+        from origin: Coordinate,
+        to destination: Coordinate,
+        mode: TravelMode,
+        departure: Date
+    ) async throws -> TravelEstimate {
+        do {
+            return try await primary.travelEstimate(from: origin, to: destination, mode: mode, departure: departure)
+        } catch {
+            return try await fallback.travelEstimate(from: origin, to: destination, mode: mode, departure: departure)
+        }
+    }
+}
+
 /// Offline fallback: straight-line distance × mode path multiplier at the mode's
 /// average speed, plus a fixed startup overhead. Always tagged `isEstimate` so the
 /// UI can label it — real routing is the default, this is the escape hatch.
