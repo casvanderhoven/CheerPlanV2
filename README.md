@@ -56,3 +56,8 @@ open App/CheerPlan.xcodeproj   # build & run the CheerPlan scheme on a simulator
 CI (`.github/workflows/ci.yml`): Core tests in a `swift:6.1` Linux container,
 SwiftLint `--strict`, and a macOS job that tests `CheerPlanUI`/`CheerPlanData` and
 builds the app for the iOS simulator — on every push and PR.
+
+## TestFlight
+
+Releases are one click via the **TestFlight** workflow (Actions tab) once the
+one-time Apple setup is done — see [docs/RELEASING.md](docs/RELEASING.md).

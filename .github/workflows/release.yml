@@ -1,0 +1,77 @@
+name: TestFlight
+
+# Manual releases only: Actions → TestFlight → Run workflow.
+# Setup (one time, ~15 min): docs/RELEASING.md
+on:
+  workflow_dispatch:
+
+jobs:
+  upload:
+    name: Archive and upload to TestFlight
+    runs-on: macos-15
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.APP_STORE_CONNECT_KEY_P8 }}
+    steps:
+      - name: Check required secrets
+        run: |
+          missing=""
+          if [ -z "$APPLE_TEAM_ID" ]; then missing="$missing APPLE_TEAM_ID"; fi
+          if [ -z "$ASC_KEY_ID" ]; then missing="$missing APP_STORE_CONNECT_KEY_ID"; fi
+          if [ -z "$ASC_ISSUER_ID" ]; then missing="$missing APP_STORE_CONNECT_ISSUER_ID"; fi
+          if [ -z "$ASC_KEY_P8" ]; then missing="$missing APP_STORE_CONNECT_KEY_P8"; fi
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing. Follow docs/RELEASING.md to set them up."
+            exit 1
+          fi
+          echo "All secrets present."
+
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec App/project.yml --project App
+
+      - name: Write App Store Connect API key
+        run: |
+          mkdir -p "$HOME/private_keys"
+          printf '%s' "$ASC_KEY_P8" > "$HOME/private_keys/AuthKey.p8"
+
+      - name: Archive with cloud signing
+        run: |
+          xcodebuild archive \
+            -project App/CheerPlan.xcodeproj \
+            -scheme CheerPlan \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/CheerPlan.xcarchive \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            -allowProvisioningUpdates \
+            -allowProvisioningDeviceRegistration \
+            -authenticationKeyPath "$HOME/private_keys/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Export and upload to App Store Connect
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/CheerPlan.xcarchive \
+            -exportOptionsPlist App/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/private_keys/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          echo "Uploaded build $GITHUB_RUN_NUMBER. It appears in TestFlight after Apple's processing (~5–30 min)."
+
+      - name: Keep archive for debugging
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CheerPlan-xcarchive
+          path: build/CheerPlan.xcarchive
+          if-no-files-found: ignore
