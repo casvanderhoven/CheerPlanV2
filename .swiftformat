@@ -1,0 +1,10 @@
+# SwiftFormat configuration (run locally: `swiftformat .`)
+--swiftversion 6.0
+--indent 4
+--maxwidth 130
+--wraparguments before-first
+--wrapcollections before-first
+--stripunusedargs closure-only
+--self remove
+--importgrouping alpha
+--disable wrapMultilineStatementBraces

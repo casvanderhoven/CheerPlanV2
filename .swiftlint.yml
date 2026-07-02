@@ -1,0 +1,38 @@
+included:
+  - CheerPlanCore
+
+# Spec §5: no file over 400 lines — hard error.
+file_length:
+  warning: 350
+  error: 400
+
+line_length:
+  warning: 130
+  error: 150
+
+function_body_length:
+  warning: 60
+  error: 100
+
+type_body_length:
+  warning: 300
+  error: 400
+
+cyclomatic_complexity:
+  warning: 12
+  error: 20
+
+# Domain math legitimately uses short names (d, t, a, b, x, y).
+identifier_name:
+  min_length: 1
+  max_length: 50
+
+disabled_rules:
+  - todo
+  - trailing_comma
+  - opening_brace # conflicts with multiline-condition formatting
+
+opt_in_rules:
+  - empty_count
+  - sorted_imports
+  - force_unwrapping
