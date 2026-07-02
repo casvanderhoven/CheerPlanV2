@@ -15,18 +15,27 @@ public struct SupporterPlan: Identifiable, Equatable, Codable, Sendable {
     /// When they can leave that start. Nil means the race start.
     public var earliestDeparture: Date?
     public var spots: [PlannedSpot]
+    /// Extra runners followed in the same race (M6). Optional so documents
+    /// written before M6 keep decoding.
+    public var additionalRunnerPlanIDs: [UUID]?
+
+    public var allRunnerPlanIDs: [UUID] {
+        [runnerPlanID] + (additionalRunnerPlanIDs ?? [])
+    }
 
     public init(
         id: UUID = UUID(),
         runnerPlanID: UUID,
         spectatorStart: Coordinate? = nil,
         earliestDeparture: Date? = nil,
-        spots: [PlannedSpot] = []
+        spots: [PlannedSpot] = [],
+        additionalRunnerPlanIDs: [UUID]? = nil
     ) {
         self.id = id
         self.runnerPlanID = runnerPlanID
         self.spectatorStart = spectatorStart
         self.earliestDeparture = earliestDeparture
         self.spots = spots
+        self.additionalRunnerPlanIDs = additionalRunnerPlanIDs
     }
 }

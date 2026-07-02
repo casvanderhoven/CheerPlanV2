@@ -5,12 +5,16 @@ public struct PlannedSpot: Identifiable, Equatable, Codable, Sendable {
     public var meetPoint: MeetPoint
     /// Mode used to travel *to* this spot (per-leg travel mode).
     public var travelMode: TravelMode
+    /// Which crew member covers this spot (M6). Local label; optional so
+    /// documents written before M6 keep decoding.
+    public var assignee: String?
 
     public var id: UUID { meetPoint.id }
 
-    public init(meetPoint: MeetPoint, travelMode: TravelMode) {
+    public init(meetPoint: MeetPoint, travelMode: TravelMode, assignee: String? = nil) {
         self.meetPoint = meetPoint
         self.travelMode = travelMode
+        self.assignee = assignee
     }
 }
 
