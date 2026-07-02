@@ -3,6 +3,7 @@ import SwiftUI
 import Testing
 @testable import CheerPlanUI
 
+@MainActor
 @Suite struct ThemeTests {
     @Test func feasibilityColorsAreDistinct() {
         let colors = FeasibilityStatus.allCases.map { CheerPlanColors.color(for: $0) }
@@ -10,6 +11,7 @@ import Testing
     }
 }
 
+@MainActor
 @Suite struct ElevationSamplingTests {
     func course(pointCount: Int, elevated: Bool) -> Course {
         let points = (0..<pointCount).map { index in

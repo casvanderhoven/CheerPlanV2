@@ -65,7 +65,9 @@ public struct ElevationProfileView: View {
 
     /// Up to `maxSamples` evenly spaced samples, each a binary-searched
     /// point-at-distance lookup — never a rescan of the raw track.
-    static func samples(for course: Course, maxSamples: Int = 200) -> [Sample] {
+    /// Pure function; `nonisolated` because `View` conformance would otherwise
+    /// pin it to the main actor.
+    nonisolated static func samples(for course: Course, maxSamples: Int = 200) -> [Sample] {
         guard course.hasElevation, course.totalDistance > 0 else { return [] }
         let geometry = CourseGeometry(course: course)
         let count = min(maxSamples, max(2, course.points.count))
