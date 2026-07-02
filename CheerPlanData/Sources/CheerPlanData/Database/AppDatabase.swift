@@ -41,6 +41,21 @@ public struct AppDatabase: Sendable {
                 table.column("pacingData", .blob).notNull()
             }
         }
+        migrator.registerMigration("v2-supporter-and-travel-cache") { db in
+            try db.create(table: "supporterPlan") { table in
+                table.primaryKey("id", .text)
+                table.column("runnerPlanId", .text).notNull().indexed()
+                table.column("document", .blob).notNull()
+            }
+            try db.create(table: "travelCache") { table in
+                table.primaryKey("key", .text)
+                table.column("mode", .text).notNull()
+                table.column("duration", .double).notNull()
+                table.column("distance", .double)
+                table.column("isEstimate", .boolean).notNull()
+                table.column("expiresAt", .datetime).notNull()
+            }
+        }
         return migrator
     }
 }
