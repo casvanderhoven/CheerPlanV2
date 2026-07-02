@@ -22,6 +22,15 @@ cyclomatic_complexity:
   warning: 12
   error: 20
 
+# Timed legs and evaluation entry points legitimately carry many labeled values.
+function_parameter_count:
+  warning: 8
+  error: 10
+
+large_tuple:
+  warning: 3
+  error: 4
+
 # Domain math legitimately uses short names (d, t, a, b, x, y).
 identifier_name:
   min_length: 1
@@ -34,5 +43,4 @@ disabled_rules:
 
 opt_in_rules:
   - empty_count
-  - sorted_imports
   - force_unwrapping

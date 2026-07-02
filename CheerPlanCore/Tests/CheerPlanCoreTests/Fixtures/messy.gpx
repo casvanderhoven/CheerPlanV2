@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="CheerPlan fixtures" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+     <name>  Messy Course  </name>
+  </metadata>
+  <trk><trkseg>
+    <trkpt lat="51.5000000" lon="-0.1000000">
+        <ele>
+          10.0
+        </ele>
+    </trkpt>
+    <trkpt lat="51.5000000" lon="-0.0985553"/>
+    <trkpt lat="51.5000000" lon="-0.0971107">
+        <ele>
+          12.0
+        </ele>
+    </trkpt>
+      <trkpt lon="-0.0956660" lat="51.5000000"><ele>12.0</ele></trkpt>
+    <trkpt lat="51.5000000"   lon="-0.0956660" />
+<trkpt lon="-0.0956660" lat="51.5000000"></trkpt>
+    <trkpt lat="51.5000000" lon="-0.0942214">
+        <ele>
+          14.0
+        </ele>
+    </trkpt>
+    <trkpt lat="51.5000000" lon="-0.0927767"/>
+    <trkpt lat="51.5000000" lon="-0.0913320">
+        <ele>
+          16.0
+        </ele>
+    </trkpt>
+    <trkpt lat="51.5000000" lon="-0.0898874"/>
+    <trkpt lat="51.5000000" lon="-0.0884427">
+        <ele>
+          18.0
+        </ele>
+    </trkpt>
+    <trkpt lat="51.5000000" lon="-0.0869981"/>
+  <!-- a comment, why not -->
+  </trkseg></trk>
+</gpx>

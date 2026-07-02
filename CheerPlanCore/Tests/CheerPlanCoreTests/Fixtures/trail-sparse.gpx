@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="CheerPlan fixtures" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Fixture Sparse Trail</name></metadata>
+  <rte>
+    <rtept lat="46.5000000" lon="8.0000000"/>
+    <rtept lat="46.5004655" lon="8.0025239"/>
+    <rtept lat="46.5022573" lon="8.0027517"/>
+    <rtept lat="46.5027228" lon="8.0052757"/>
+    <rtept lat="46.5045146" lon="8.0055034"/>
+    <rtept lat="46.5049802" lon="8.0080276"/>
+    <rtept lat="46.5067720" lon="8.0082553"/>
+    <rtept lat="46.5072375" lon="8.0107796"/>
+    <rtept lat="46.5090293" lon="8.0110073"/>
+    <rtept lat="46.5094948" lon="8.0135317"/>
+    <rtept lat="46.5112866" lon="8.0137595"/>
+    <rtept lat="46.5117521" lon="8.0162839"/>
+    <rtept lat="46.5135439" lon="8.0165117"/>
+    <rtept lat="46.5140095" lon="8.0190362"/>
+    <rtept lat="46.5158013" lon="8.0192640"/>
+    <rtept lat="46.5162668" lon="8.0217887"/>
+    <rtept lat="46.5180586" lon="8.0220165"/>
+    <rtept lat="46.5185241" lon="8.0245413"/>
+    <rtept lat="46.5203159" lon="8.0247691"/>
+    <rtept lat="46.5207814" lon="8.0272939"/>
+    <rtept lat="46.5225732" lon="8.0275218"/>
+    <rtept lat="46.5230387" lon="8.0300467"/>
+    <rtept lat="46.5248305" lon="8.0302746"/>
+    <rtept lat="46.5252961" lon="8.0327997"/>
+    <rtept lat="46.5270879" lon="8.0330275"/>
+    <rtept lat="46.5275534" lon="8.0355527"/>
+    <rtept lat="46.5293452" lon="8.0357805"/>
+    <rtept lat="46.5298107" lon="8.0383058"/>
+    <rtept lat="46.5316025" lon="8.0385337"/>
+    <rtept lat="46.5320680" lon="8.0410591"/>
+    <rtept lat="46.5338598" lon="8.0412869"/>
+    <rtept lat="46.5343254" lon="8.0438124"/>
+    <rtept lat="46.5361172" lon="8.0440403"/>
+    <rtept lat="46.5365827" lon="8.0465659"/>
+    <rtept lat="46.5383745" lon="8.0467938"/>
+    <rtept lat="46.5388400" lon="8.0493195"/>
+    <rtept lat="46.5406318" lon="8.0495474"/>
+    <rtept lat="46.5410973" lon="8.0520732"/>
+    <rtept lat="46.5428891" lon="8.0523011"/>
+    <rtept lat="46.5433546" lon="8.0548271"/>
+  </rte>
+</gpx>
