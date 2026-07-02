@@ -7,7 +7,11 @@ import Foundation
 /// failures here are intentionally quiet.
 @MainActor
 final class LiveActivityController {
-    private var activity: Activity<RaceActivityAttributes>?
+    /// `Activity` is not Sendable-annotated yet, so awaiting its nonisolated
+    /// `update`/`end` from a main-actor property trips strict concurrency.
+    /// All reads/writes happen on the main actor and ActivityKit's API is
+    /// thread-safe, so the unsafe opt-out is sound here.
+    private nonisolated(unsafe) var activity: Activity<RaceActivityAttributes>?
 
     func start(runnerName: String, state: RaceActivityAttributes.ContentState?) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled, let state else { return }
