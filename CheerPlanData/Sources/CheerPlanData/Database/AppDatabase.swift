@@ -56,6 +56,14 @@ public struct AppDatabase: Sendable {
                 table.column("expiresAt", .datetime).notNull()
             }
         }
+        migrator.registerMigration("v3-raceSession") { db in
+            try db.create(table: "raceSession") { table in
+                table.primaryKey("id", .text)
+                table.column("supporterPlanId", .text).notNull().indexed()
+                table.column("isEnded", .boolean).notNull()
+                table.column("document", .blob).notNull()
+            }
+        }
         return migrator
     }
 }
