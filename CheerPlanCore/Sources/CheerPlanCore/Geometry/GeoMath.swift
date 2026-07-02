@@ -24,6 +24,17 @@ enum GeoMath {
         return (x, y)
     }
 
+    /// Initial great-circle bearing from `a` to `b`, degrees clockwise from north.
+    static func initialBearing(from a: Coordinate, to b: Coordinate) -> Double {
+        let lat1 = a.latitude * .pi / 180
+        let lat2 = b.latitude * .pi / 180
+        let deltaLon = (b.longitude - a.longitude) * .pi / 180
+        let y = sin(deltaLon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLon)
+        let degrees = atan2(y, x) * 180 / .pi
+        return (degrees + 360).truncatingRemainder(dividingBy: 360)
+    }
+
     /// Linear interpolation between two coordinates (valid at track-segment scales).
     static func interpolate(_ a: Coordinate, _ b: Coordinate, fraction: Double) -> Coordinate {
         Coordinate(

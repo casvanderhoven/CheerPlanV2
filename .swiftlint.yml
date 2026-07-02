@@ -1,5 +1,8 @@
 included:
   - CheerPlanCore
+  - CheerPlanData
+  - CheerPlanUI
+  - App
 
 # Spec §5: no file over 400 lines — hard error.
 file_length:

@@ -56,6 +56,13 @@ public enum Formatters {
         return "\(components.hour ?? 0):\(padded(components.minute ?? 0))"
     }
 
+    /// "N", "NE", … for a bearing in degrees clockwise from north.
+    public static func compass(bearing: Double) -> String {
+        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+        let normalized = (bearing.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360)
+        return directions[Int((normalized + 22.5) / 45) % 8]
+    }
+
     private static func padded(_ value: Int) -> String {
         value < 10 ? "0\(value)" : "\(value)"
     }

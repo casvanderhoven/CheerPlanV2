@@ -66,7 +66,11 @@ import Testing
                 desiredCount: 3
             )
         )
-        #expect(itinerary.spots.map(\.meetPoint.courseDistance) == [1_500, 3_000])
+        let distances = itinerary.spots.map(\.meetPoint.courseDistance)
+        #expect(distances.count == 2)
+        // the second pick is the finish, whose distance is a haversine sum ≈ 3000
+        #expect(approx(distances[0], 1_500, tolerance: 0.01))
+        #expect(approx(distances[1], 3_000, tolerance: 0.01))
         #expect(itinerary.legs.allSatisfy { $0.verdict.status == .tight })
         #expect(itinerary.worstStatus == .tight)
     }

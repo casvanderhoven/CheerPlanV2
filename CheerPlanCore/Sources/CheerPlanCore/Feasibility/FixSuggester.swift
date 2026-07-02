@@ -1,7 +1,7 @@
 import Foundation
 
 /// One concrete way to repair an infeasible leg.
-public enum FixSuggestion: Equatable, Sendable {
+public enum FixSuggestion: Hashable, Sendable {
     /// Switch how the spectator travels this leg (driving included — v1 forgot it).
     case changeTravelMode(to: TravelMode, verdict: FeasibilityVerdict)
     /// Move the destination spot forward to the nearest feasible course distance.

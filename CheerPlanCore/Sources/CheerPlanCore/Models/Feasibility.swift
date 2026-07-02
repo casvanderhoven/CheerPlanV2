@@ -21,7 +21,7 @@ public enum FeasibilityStatus: String, Codable, Sendable, Comparable, CaseIterab
 
 /// The verdict for one travel leg, with the numbers that justify it
 /// (surfaced by the UI's progressive-disclosure layer).
-public struct FeasibilityVerdict: Equatable, Codable, Sendable {
+public struct FeasibilityVerdict: Hashable, Codable, Sendable {
     public var status: FeasibilityStatus
     /// Spare seconds between spectator arrival and runner arrival. Negative = shortfall.
     public var buffer: TimeInterval

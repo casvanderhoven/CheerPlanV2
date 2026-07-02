@@ -5,7 +5,7 @@ import Foundation
 /// `courseDistance` identifies *which pass* of the runner this spot watches: on
 /// out-and-back or lapped courses the same physical coordinate maps to several
 /// course distances, and each is a distinct sighting.
-public struct MeetPoint: Identifiable, Equatable, Codable, Sendable {
+public struct MeetPoint: Identifiable, Hashable, Codable, Sendable {
     public let id: UUID
     public var name: String
     /// Position on the course polyline (already snapped).

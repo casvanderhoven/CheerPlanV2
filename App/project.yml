@@ -1,0 +1,87 @@
+# XcodeGen spec — generate with `xcodegen generate --spec App/project.yml --project App`
+name: CheerPlan
+options:
+  bundleIdPrefix: com.cheerplan
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+packages:
+  CheerPlanCore:
+    path: ../CheerPlanCore
+  CheerPlanData:
+    path: ../CheerPlanData
+  CheerPlanUI:
+    path: ../CheerPlanUI
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+targets:
+  CheerPlan:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+        excludes:
+          - "Widgets/**"
+    dependencies:
+      - package: CheerPlanCore
+      - package: CheerPlanData
+      - package: CheerPlanUI
+      - target: CheerPlanWidgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cheerplan.app
+        TARGETED_DEVICE_FAMILY: "1"
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.6.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: Sources/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ITSAppUsesNonExemptEncryption: false
+        NSSupportsLiveActivities: true
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleURLTypes:
+          - CFBundleURLName: com.cheerplan.app
+            CFBundleURLSchemes:
+              - cheerplan
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: CheerPlan Plan
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Owner
+            LSItemContentTypes:
+              - com.cheerplan.plan
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.cheerplan.plan
+            UTTypeDescription: CheerPlan Plan
+            UTTypeConformsTo:
+              - public.json
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - cheerplan
+    scheme:
+      testTargets: []
+  CheerPlanWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Sources/Widgets
+      - path: Sources/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cheerplan.app.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.6.0"
+    info:
+      path: Sources/Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: CheerPlan
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

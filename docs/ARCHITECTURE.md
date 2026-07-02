@@ -37,10 +37,15 @@ Rules, enforced by review and by construction:
   the built-in heuristic estimator) and `PositionSource` (check-ins, recalibration,
   runner location sharing, official timing feeds) are defined in Core; implementations
   live in the app layer.
-- **The live race engine (M5) is an actor** owning the timing model, with a persisted
-  event log of observations so state reconstructs after relaunch. Core already models
-  the events (`RunnerObservation`) and the math (`ProgressEstimator`); the actor and
-  its log are app-layer.
+- **The live race engine is an actor** (`CheerPlanData/Live/LiveRaceEngine.swift`)
+  owning the timing model, with a persisted event log (`RaceSession.observations`)
+  committed on every mutation — state reconstructs exactly after relaunch by
+  replaying the log into `ProgressEstimator`. The pure race-day state machine
+  (`RaceDayEngine` in Core) computes phases and leave-by times from the itinerary's
+  *stored* travel estimates, keeping race day offline-first. Race day tracks the
+  primary runner; the Live Activity countdown uses native timer text so it ticks
+  without pushes. Crew assignments are local labels (multi-device sync needs a
+  backend — deferred).
 - **Typed errors for every failable operation**, surfaced to the user. No
   print-and-swallow.
 - **One view per file, no file over 400 lines** (SwiftLint-enforced), design system in
@@ -50,33 +55,41 @@ Rules, enforced by review and by construction:
 
 | Decision | Choice | Rationale | Status |
 |---|---|---|---|
-| Persistence (SwiftData vs GRDB, spec says pick one) | **GRDB (recommendation)** | The live engine's event log and "persist on every mutation" favor explicit, synchronous write control; GRDB is fully testable off-device and battle-tested for migrations. | Proposed — final call at M2; veto welcome |
+| Persistence (SwiftData vs GRDB, spec says pick one) | **GRDB** | The live engine's event log and "persist on every mutation" favor explicit, synchronous write control; GRDB is fully testable off-device and battle-tested for migrations. All access goes through the `PlanStore` protocol (`CheerPlanData`), so previews/tests use `InMemoryPlanStore`. | Adopted (M2) |
 | Test framework | **Swift Testing** | Native to the Swift 6 toolchain, runs under `swift test` on Linux CI. | Adopted |
-| Share-link payload | Versioned from day one; CloudKit public DB vs. tiny redirect service | Spec §5. | Open — decide at M4 |
-| CI | Linux container job (`swift:6.1`) for Core tests + SwiftLint job; macOS app-build job added at M2 | Core is platform-agnostic, so the crown-jewel math is verified on every push without macOS minutes. | Adopted |
+| Share-link payload | **Serverless v1**: the whole plan travels in the URL fragment (`https://cheerplan.app/p#v1.<base64url>`), course simplified (Douglas–Peucker) + polyline-encoded; `.cheerplan` files carry full fidelity | No backend needed for phone-to-phone sharing; a CloudKit/redirect service + App Clip + web preview can later wrap the same versioned payloads (remaining M4 work — needs infra + signing). | Adopted (M4) |
+| CI | Linux container job (`swift:6.1`) for Core tests + SwiftLint job + macOS job (`macos-15`): CheerPlanUI/CheerPlanData `swift test`, XcodeGen project generation, simulator build of the app | Core is platform-agnostic and verified on every push; the macOS job proves the SwiftUI/MapKit/Charts and GRDB code compiles and passes tests. | Adopted |
 
 ## Roadmap (spec §7)
 
 | Milestone | Deliverable | Status |
 |---|---|---|
-| **M1** | `CheerPlanCore`: models + GPX + ETA + snapping + feasibility + proposer + live estimator, fully tested on real GPX fixtures | **This PR** |
-| M2 | App shell: import GPX, course map + elevation, create runner plan | — |
-| M3 | Supporter planning: spots, auto-propose, real MapKit routing, feasibility + fixes UI | — |
-| M4 | Sharing: deep links + App Clip preview, `.cheerplan` fallback | — |
-| M5 | Race day: live engine actor, persistence/resume, Live Activity, notifications | — |
-| M6 | Multi-runner + crew assignments | — |
+| **M1** | `CheerPlanCore`: models + GPX + ETA + snapping + feasibility + proposer + live estimator, fully tested on real GPX fixtures | **Done (PR #1)** |
+| **M2** | App shell: import GPX (file/URL), course map + elevation, create/edit/duplicate runner plans, GRDB persistence | **Done** |
+| **M3** | Supporter planning: tap-to-add spots (pass-aware), auto-propose, real MapKit routing + on-disk cache, feasibility + fixes UI | **Done** |
+| **M4** | Sharing: serverless deep links + `.cheerplan` files, in-app open handling | **Done** (App Clip/web preview deferred — needs infra) |
+| **M5** | Race day: `LiveRaceEngine` actor over a persisted event log (force-quit-proof), glanceable race screen, recalibration, leave-now notifications, Live Activity + Dynamic Island widget extension | **This PR** |
+| **M6** | Multi-runner itineraries (combined windows) + local crew assignments per spot | **This PR** (multi-device crew sync deferred — needs backend) |
 
 ## Repository layout
 
 ```
 CheerPlanV2/
-├── CheerPlanCore/          # M1 — this PR. SwiftPM package, Linux-testable.
+├── CheerPlanCore/          # M1. SwiftPM package, Linux-testable.
 │   ├── Package.swift
 │   ├── Sources/CheerPlanCore/{Models,GPX,Geometry,Pacing,Feasibility,Propose,Live,Format}
 │   └── Tests/CheerPlanCoreTests/  (+ Fixtures/)
-├── CheerPlanData/          # M2+
-├── CheerPlanUI/            # M2+
-├── App/                    # M2+ (XcodeGen or Xcode project, app + extension targets)
+├── CheerPlanData/          # M2. GRDB persistence behind the PlanStore protocol.
+│   └── Sources/CheerPlanData/{Database,Stores}
+├── CheerPlanUI/            # M2. Design system: theme, StatusPill, ElevationProfileView.
+│   └── Sources/CheerPlanUI/{Theme,Components,Format}
+├── App/                    # M2. XcodeGen project (project.yml) + SwiftUI app sources.
+│   └── Sources/{Root,Runner,Course}  # one view per file
 ├── docs/                   # SPEC.md · DOMAIN.md · ARCHITECTURE.md
+├── tools/                  # deterministic GPX fixture generator
 └── .github/workflows/ci.yml
 ```
+
+Generate the Xcode project locally with `xcodegen generate --spec App/project.yml --project App`
+(`brew install xcodegen`), then open `App/CheerPlan.xcodeproj`. The `.xcodeproj` is
+generated, never committed.
