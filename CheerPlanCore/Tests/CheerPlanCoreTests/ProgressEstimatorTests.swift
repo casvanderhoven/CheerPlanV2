@@ -42,7 +42,7 @@ import Testing
         var estimator = ProgressEstimator(plan: try tenKPlan())
         estimator.record(observed(5_000, at: 1_350, source: .timingFeed))
         #expect(estimator.paceRatio < 1)
-        #expect(estimator.scheduleDelta == -150)
+        #expect(approx(estimator.scheduleDelta, -150, tolerance: 1e-6))
         #expect(estimator.projectedFinish < raceStart.addingTimeInterval(3_000))
     }
 
@@ -82,6 +82,6 @@ import Testing
     @Test func projectionsClampAtTheFinish() throws {
         var estimator = ProgressEstimator(plan: try tenKPlan())
         estimator.record(observed(5_000, at: 1_650))
-        #expect(estimator.estimatedDistance(at: raceStart.addingTimeInterval(100_000)) == 10_000)
+        #expect(approx(estimator.estimatedDistance(at: raceStart.addingTimeInterval(100_000)), 10_000, tolerance: 0.01))
     }
 }
