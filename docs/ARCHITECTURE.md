@@ -37,10 +37,15 @@ Rules, enforced by review and by construction:
   the built-in heuristic estimator) and `PositionSource` (check-ins, recalibration,
   runner location sharing, official timing feeds) are defined in Core; implementations
   live in the app layer.
-- **The live race engine (M5) is an actor** owning the timing model, with a persisted
-  event log of observations so state reconstructs after relaunch. Core already models
-  the events (`RunnerObservation`) and the math (`ProgressEstimator`); the actor and
-  its log are app-layer.
+- **The live race engine is an actor** (`CheerPlanData/Live/LiveRaceEngine.swift`)
+  owning the timing model, with a persisted event log (`RaceSession.observations`)
+  committed on every mutation — state reconstructs exactly after relaunch by
+  replaying the log into `ProgressEstimator`. The pure race-day state machine
+  (`RaceDayEngine` in Core) computes phases and leave-by times from the itinerary's
+  *stored* travel estimates, keeping race day offline-first. Race day tracks the
+  primary runner; the Live Activity countdown uses native timer text so it ticks
+  without pushes. Crew assignments are local labels (multi-device sync needs a
+  backend — deferred).
 - **Typed errors for every failable operation**, surfaced to the user. No
   print-and-swallow.
 - **One view per file, no file over 400 lines** (SwiftLint-enforced), design system in
@@ -61,10 +66,10 @@ Rules, enforced by review and by construction:
 |---|---|---|
 | **M1** | `CheerPlanCore`: models + GPX + ETA + snapping + feasibility + proposer + live estimator, fully tested on real GPX fixtures | **Done (PR #1)** |
 | **M2** | App shell: import GPX (file/URL), course map + elevation, create/edit/duplicate runner plans, GRDB persistence | **Done** |
-| **M3** | Supporter planning: tap-to-add spots (pass-aware), auto-propose, real MapKit routing + on-disk cache, feasibility + fixes UI | **This PR** |
-| **M4** | Sharing: serverless deep links + `.cheerplan` files, in-app open handling | **This PR** (App Clip/web preview deferred — needs infra) |
-| M5 | Race day: live engine actor, persistence/resume, Live Activity, notifications | — |
-| M6 | Multi-runner + crew assignments | — |
+| **M3** | Supporter planning: tap-to-add spots (pass-aware), auto-propose, real MapKit routing + on-disk cache, feasibility + fixes UI | **Done** |
+| **M4** | Sharing: serverless deep links + `.cheerplan` files, in-app open handling | **Done** (App Clip/web preview deferred — needs infra) |
+| **M5** | Race day: `LiveRaceEngine` actor over a persisted event log (force-quit-proof), glanceable race screen, recalibration, leave-now notifications, Live Activity + Dynamic Island widget extension | **This PR** |
+| **M6** | Multi-runner itineraries (combined windows) + local crew assignments per spot | **This PR** (multi-device crew sync deferred — needs backend) |
 
 ## Repository layout
 

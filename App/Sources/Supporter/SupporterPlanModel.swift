@@ -12,19 +12,29 @@ final class SupporterPlanModel {
     let runnerPlan: RunnerPlan
     let geometry: CourseGeometry
     private let store: any SupporterPlanStore
+    private let planStore: any PlanStore
     private let engine: FeasibilityEngine
 
     private(set) var plan: SupporterPlan
     private(set) var itinerary = SupporterItinerary()
+    /// The primary runner plus everyone added via the Runners menu (M6).
+    private(set) var trackedPlans: [RunnerPlan]
     private(set) var isEvaluating = false
     var errorMessage: String?
 
-    init(runnerPlan: RunnerPlan, store: any SupporterPlanStore, travelProvider: any TravelTimeProvider) {
+    init(
+        runnerPlan: RunnerPlan,
+        store: any SupporterPlanStore,
+        planStore: any PlanStore,
+        travelProvider: any TravelTimeProvider
+    ) {
         self.runnerPlan = runnerPlan
         self.geometry = CourseGeometry(course: runnerPlan.course)
         self.store = store
+        self.planStore = planStore
         self.engine = FeasibilityEngine(provider: travelProvider)
         self.plan = SupporterPlan(runnerPlanID: runnerPlan.id)
+        self.trackedPlans = [runnerPlan]
     }
 
     func load() async {
@@ -34,10 +44,61 @@ final class SupporterPlanModel {
             } else {
                 try await store.save(plan)
             }
+            await resolveTrackedPlans()
             await evaluate()
         } catch {
             errorMessage = "Couldn't load your cheering plan: \(error.localizedDescription)"
         }
+    }
+
+    // MARK: - Multi-runner (M6)
+
+    func isTracking(_ other: RunnerPlan) -> Bool {
+        plan.additionalRunnerPlanIDs?.contains(other.id) ?? false
+    }
+
+    func toggleRunner(_ other: RunnerPlan) async {
+        var ids = plan.additionalRunnerPlanIDs ?? []
+        if let index = ids.firstIndex(of: other.id) {
+            ids.remove(at: index)
+        } else {
+            ids.append(other.id)
+        }
+        plan.additionalRunnerPlanIDs = ids.isEmpty ? nil : ids
+        await resolveTrackedPlans()
+        await persistAndEvaluate()
+    }
+
+    /// First-to-last runner window at a spot — what "see everyone" costs.
+    func passWindow(atDistance distance: Double) -> (first: Date, last: Date)? {
+        guard trackedPlans.count > 1 else { return nil }
+        return (
+            FeasibilityEngine.firstArrival(atDistance: distance, plans: trackedPlans),
+            FeasibilityEngine.lastArrival(atDistance: distance, plans: trackedPlans)
+        )
+    }
+
+    private func resolveTrackedPlans() async {
+        var plans = [runnerPlan]
+        for id in plan.additionalRunnerPlanIDs ?? [] {
+            // A deleted runner plan silently drops out of the crew view.
+            if let extra = try? await planStore.fetch(id: id) {
+                plans.append(extra)
+            }
+        }
+        trackedPlans = plans
+    }
+
+    // MARK: - Crew assignments (M6)
+
+    func assignee(forSpot id: UUID) -> String? {
+        plan.spots.first { $0.id == id }?.assignee
+    }
+
+    func setAssignee(_ name: String?, forSpot id: UUID) async {
+        guard let index = plan.spots.firstIndex(where: { $0.id == id }) else { return }
+        plan.spots[index].assignee = name
+        await persistAndEvaluate()
     }
 
     // MARK: - Mutations (each persists, then re-evaluates)
@@ -93,7 +154,7 @@ final class SupporterPlanModel {
             let proposer = SpotProposer(engine: engine)
             let proposed = try await proposer.propose(
                 SpotProposer.Request(
-                    plan: runnerPlan,
+                    plans: trackedPlans,
                     spectatorStart: start,
                     earliestDeparture: plan.earliestDeparture,
                     travelMode: mode,
@@ -161,7 +222,7 @@ final class SupporterPlanModel {
         do {
             itinerary = try await engine.evaluate(
                 spots: plan.spots,
-                plan: runnerPlan,
+                plans: trackedPlans,
                 spectatorStart: start,
                 earliestDeparture: plan.earliestDeparture
             )

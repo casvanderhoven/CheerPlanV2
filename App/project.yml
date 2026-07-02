@@ -20,17 +20,20 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Sources
+      - path: Sources
+        excludes:
+          - "Widgets/**"
     dependencies:
       - package: CheerPlanCore
       - package: CheerPlanData
       - package: CheerPlanUI
+      - target: CheerPlanWidgets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cheerplan.app
         TARGETED_DEVICE_FAMILY: "1"
         CURRENT_PROJECT_VERSION: "1"
-        MARKETING_VERSION: "0.4.0"
+        MARKETING_VERSION: "0.6.0"
     info:
       path: Sources/Info.plist
       properties:
@@ -38,6 +41,7 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         ITSAppUsesNonExemptEncryption: false
+        NSSupportsLiveActivities: true
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleURLTypes:
@@ -60,3 +64,23 @@ targets:
                 - cheerplan
     scheme:
       testTargets: []
+  CheerPlanWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Sources/Widgets
+      - path: Sources/Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cheerplan.app.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.6.0"
+    info:
+      path: Sources/Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: CheerPlan
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

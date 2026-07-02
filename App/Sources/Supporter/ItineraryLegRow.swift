@@ -10,6 +10,9 @@ struct ItineraryLegRow: View {
     let model: SupporterPlanModel
     var onFix: () -> Void
 
+    @State private var showingAssign = false
+    @State private var assigneeDraft = ""
+
     var body: some View {
         HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
@@ -18,8 +21,14 @@ struct ItineraryLegRow: View {
                 Text(timing)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let assignee = model.assignee(forSpot: leg.destination.id) {
+                    Label(assignee, systemImage: "person.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer()
+            assignButton
             modeMenu
             statusButton
             Button("Remove spot", systemImage: "xmark.circle", role: .destructive) {
@@ -28,6 +37,17 @@ struct ItineraryLegRow: View {
             .labelStyle(.iconOnly)
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
+        }
+        .alert("Who covers this spot?", isPresented: $showingAssign) {
+            TextField("Name", text: $assigneeDraft)
+            Button("Assign") {
+                let trimmed = assigneeDraft.trimmingCharacters(in: .whitespaces)
+                Task { await model.setAssignee(trimmed.isEmpty ? nil : trimmed, forSpot: leg.destination.id) }
+            }
+            Button("Clear", role: .destructive) {
+                Task { await model.setAssignee(nil, forSpot: leg.destination.id) }
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 
@@ -38,9 +58,24 @@ struct ItineraryLegRow: View {
 
     private var timing: String {
         let leave = LocalizedFormatters.time(leg.latestDeparture)
-        let arrives = LocalizedFormatters.time(leg.runnerArrival)
         let suffix = leg.estimate.isEstimate ? " · est." : ""
+        if let window = model.passWindow(atDistance: leg.destination.courseDistance) {
+            let first = LocalizedFormatters.time(window.first)
+            let last = LocalizedFormatters.time(window.last)
+            return "Leave by \(leave) · runners ~\(first)–\(last)\(suffix)"
+        }
+        let arrives = LocalizedFormatters.time(leg.runnerArrival)
         return "Leave by \(leave) · runner ~\(arrives)\(suffix)"
+    }
+
+    private var assignButton: some View {
+        Button("Assign", systemImage: "person.crop.circle.badge.plus") {
+            assigneeDraft = model.assignee(forSpot: leg.destination.id) ?? ""
+            showingAssign = true
+        }
+        .labelStyle(.iconOnly)
+        .buttonStyle(.plain)
+        .foregroundStyle(.secondary)
     }
 
     private var modeMenu: some View {

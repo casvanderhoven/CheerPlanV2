@@ -9,6 +9,7 @@ import Observation
 final class AppState {
     let planStore: any PlanStore
     let supporterPlanStore: any SupporterPlanStore
+    let raceSessionStore: any RaceSessionStore
     let travelTimeProvider: any TravelTimeProvider
     let startupError: String?
 
@@ -20,6 +21,7 @@ final class AppState {
     init(dependencies: Dependencies) {
         self.planStore = dependencies.planStore
         self.supporterPlanStore = dependencies.supporterPlanStore
+        self.raceSessionStore = dependencies.raceSessionStore
         self.travelTimeProvider = dependencies.travelTimeProvider
         self.startupError = dependencies.startupError
     }

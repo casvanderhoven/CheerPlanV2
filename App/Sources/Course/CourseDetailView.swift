@@ -47,6 +47,7 @@ struct CourseDetailView: View {
                     model: SupporterPlanModel(
                         runnerPlan: currentPlan,
                         store: appState.supporterPlanStore,
+                        planStore: appState.planStore,
                         travelProvider: appState.travelTimeProvider
                     )
                 )

@@ -15,10 +15,12 @@ struct LegSelection: Identifiable {
 /// tap away from the course to set where you start. The bottom panel is the
 /// live-updating itinerary with feasibility traffic lights.
 struct SupporterPlanView: View {
+    @Environment(AppState.self) private var appState
     @State private var model: SupporterPlanModel
     @State private var pendingPasses: [CourseGeometry.SnapResult] = []
     @State private var showingAutoPropose = false
     @State private var fixLeg: LegSelection?
+    @State private var raceModel: LiveRaceModel?
 
     init(model: SupporterPlanModel) {
         _model = State(initialValue: model)
@@ -47,15 +49,23 @@ struct SupporterPlanView: View {
         .navigationTitle("Cheer plan")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItemGroup(placement: .primaryAction) {
+                runnersMenu
                 Button("Auto-propose", systemImage: "wand.and.stars") {
                     showingAutoPropose = true
                 }
+                Button("Race day", systemImage: "flag.checkered") {
+                    Task { await startRaceDay() }
+                }
+                .disabled(model.itinerary.legs.isEmpty)
             }
         }
         .task { await model.load() }
         .sheet(isPresented: $showingAutoPropose) {
             AutoProposeView(model: model)
+        }
+        .fullScreenCover(item: $raceModel) { raceModel in
+            RaceDayView(model: raceModel)
         }
         .sheet(item: $fixLeg) { selection in
             FixSuggestionsView(model: model, legIndex: selection.index)
@@ -76,6 +86,42 @@ struct SupporterPlanView: View {
             Button("OK", role: .cancel) { model.errorMessage = nil }
         } message: {
             Text(model.errorMessage ?? "")
+        }
+    }
+
+    /// Follow more runners in the same race (M6): the itinerary then requires
+    /// arriving before the first of them and staying past the last.
+    private var runnersMenu: some View {
+        Menu("Runners", systemImage: "person.2") {
+            let others = appState.plans.filter { $0.id != model.runnerPlan.id }
+            if others.isEmpty {
+                Text("Import another runner's plan to cheer for more people at once.")
+            }
+            ForEach(others) { other in
+                Button {
+                    Task { await model.toggleRunner(other) }
+                } label: {
+                    if model.isTracking(other) {
+                        Label(other.name, systemImage: "checkmark")
+                    } else {
+                        Text(other.name)
+                    }
+                }
+            }
+        }
+    }
+
+    private func startRaceDay() async {
+        do {
+            let engine = try await LiveRaceEngine.startOrResume(
+                supporterPlan: model.plan,
+                runnerPlan: model.runnerPlan,
+                itinerary: model.itinerary,
+                store: appState.raceSessionStore
+            )
+            raceModel = LiveRaceModel(engine: engine, runnerPlan: model.runnerPlan, itinerary: model.itinerary)
+        } catch {
+            model.errorMessage = "Couldn't start race day: \(error.localizedDescription)"
         }
     }
 
@@ -143,8 +189,10 @@ struct SupporterPlanView: View {
             model: SupporterPlanModel(
                 runnerPlan: PreviewData.plan,
                 store: InMemorySupporterPlanStore(),
+                planStore: InMemoryPlanStore(plans: [PreviewData.plan]),
                 travelProvider: HeuristicTravelEstimator()
             )
         )
     }
+    .environment(AppState(dependencies: .preview()))
 }
